@@ -4,6 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import com.ipiecoles.java.java350.model.Entreprise;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -44,10 +47,13 @@ public class Employe {
     }
 
     public Integer getNombreAnneeAnciennete() {
-        if(dateEmbauche != null && dateEmbauche.isBefore(LocalDate.now())){
-            return LocalDate.now().getYear() - dateEmbauche.getYear();
-        }
-        return 0;
+    	if (dateEmbauche == null) {
+    		return 0;
+    	} else if (LocalDate.now().getYear() - dateEmbauche.getYear() > 0) {
+        return LocalDate.now().getYear() - dateEmbauche.getYear();
+    	} else {
+    		return 0;
+    	}
     }
 
     public Integer getNbConges() {
@@ -62,9 +68,27 @@ public class Employe {
         int i1 = d.isLeapYear() ? 365 : 366;
         int var = 104;
         switch (LocalDate.of(d.getYear(),1,1).getDayOfWeek()){
-            case THURSDAY: if(d.isLeapYear()) var =  var + 1; break;
-            case FRIDAY: if(d.isLeapYear()) var =  var + 2; else var =  var + 1;
-            case SATURDAY: var = var + 1; break;
+            case THURSDAY: 
+            	if(d.isLeapYear()) {
+            	var =  var + 1; 
+            	}
+            	break;
+            case FRIDAY: 
+            	if(d.isLeapYear()) {
+            		var =  var + 2; 
+            	}else {
+            		var =  var + 1;
+            		}
+            	break;
+            case SATURDAY: 
+            	var = var + 1; 
+            	break;
+            case MONDAY: 
+            case WEDNESDAY: 
+            case TUESDAY:
+            	break;
+            default :
+            	break;
         }
         int monInt = (int) Entreprise.joursFeries(d).stream().filter(localDate -> localDate.getDayOfWeek().getValue() <= DayOfWeek.FRIDAY.getValue()).count();
         return (int) Math.ceil((i1 - Entreprise.NB_JOURS_MAX_FORFAIT - var - Entreprise.NB_CONGES_BASE - monInt) * tempsPartiel);
@@ -82,7 +106,6 @@ public class Employe {
      *
      * @return la prime annuelle de l'employé en Euros et cents
      */
-    //Matricule, performance, date d'embauche, temps partiel, prime
     public Double getPrimeAnnuelle(){
         //Calcule de la prime d'ancienneté
         Double primeAnciennete = Entreprise.PRIME_ANCIENNETE * this.getNombreAnneeAnciennete();
@@ -191,7 +214,11 @@ public class Employe {
     }
 
     public void setPerformance(Integer performance) {
-        this.performance = performance;
+    	if (performance == null || performance <= 0) {
+    		this.performance = 1;
+    	}else {
+    		this.performance = performance;
+    	}
     }
 
     public Double getTempsPartiel() {
@@ -199,7 +226,11 @@ public class Employe {
     }
 
     public void setTempsPartiel(Double tempsPartiel) {
+    	if (tempsPartiel == null || tempsPartiel <= 0) {
+    		this.tempsPartiel = 1d;
+    	}else {
         this.tempsPartiel = tempsPartiel;
+    	}
     }
 
     @Override
